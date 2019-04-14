@@ -109,7 +109,8 @@ int contrast_number(int run1, int create_number[4], int guess_number[4])
 	int count;
 	int count1 = 0;
 	int count2 = 0;
-    char choose;	   	
+    char choose;
+    char ch;
 
 	for (count = 0; count < 4; count++) {
 		if (create_number[count]== guess_number[count]) {
@@ -142,6 +143,7 @@ int contrast_number(int run1, int create_number[4], int guess_number[4])
     while (run1) {
         printf("\nEnter 'r' play game again, 'q' quit game \n"
                "'b' back game choose, 'c' continue\n");
+        while((ch = getchar()) != '\n' && ch != EOF);
 	    choose = getchar();
 
         switch (choose) {
