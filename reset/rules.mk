@@ -1,9 +1,16 @@
 CC = gcc
-ver = release
+RM = -rm -rf
+DEBUG = TRUE
 
-CFLAGS = -g -Wall -O0
-/*CFLAGS = -Wall -O0*/
-OUTPUTNAME = Game
+ifeq ($(DEBUG),TRUE)
+	LOG = "DEBUG_Game"
+	CFLAGS ?= -g -Wall -O0 -D_DEBUG
+	OUTPUTNAME := DEBUG_Game
+else
+	LOG = "Game"
+	CFLAGS ?= -Wall -O0
+	OUTPUTNAME := Game
+endif
 
 
 TOPDIR = $(PWD)

@@ -37,7 +37,7 @@ int game_choose(int count1)
 				
 			switch (direction) {
 					case 'w':
-						if (count1 == 0){
+						if (count1 == 0) {
 							break;
                         } else {
 							count = count1;	
@@ -82,10 +82,10 @@ int game_choose_ui(int count)
 {
 
 	char choose[25] = {'*', ' ', ' ', ' ', ' ',
-		                   ' ', '*', ' ', ' ', ' ',
-		                   ' ', ' ', '*', ' ', ' ',
-		                   ' ', ' ', ' ', '*', ' ',
-		                   ' ', ' ', ' ', ' ', '*'};
+					   ' ', '*', ' ', ' ', ' ',
+					   ' ', ' ', '*', ' ', ' ',
+					   ' ', ' ', ' ', '*', ' ',
+					   ' ', ' ', ' ', ' ', '*'};
 
 
 	printf(YELLOW);
@@ -117,41 +117,43 @@ void guess_choose(void)
 	int jump = 1;
 	int count;
 	int count1 = 0;
+	char ch;
 
 	while (jump) {
 
-			system("clear");
+		system("clear");
 		
-			printf("\n           Welcome guess game              \n");
+		printf("\n           Welcome guess game              \n");
 
-			count = game_choose(count1);
+		count = game_choose(count1);
 
-			switch (count) {
-				case 0:
-					guess_enter_number();
-					break;
+		switch (count) {
+			case 0:
+				guess_enter_number();
+				break;
 
-				case 1:
-					show_Guess_Rule();
-                    getchar();
-					break;
+			case 1:
+				show_guess_rule();
+				getchar();
+				break;
 
-				case 2:
-					guess_list();
-                    getchar();
-					break;
+			case 2:
+				guess_list();
+				while ((ch = getchar()) != '\n' && ch != EOF);
+				break;
 
-				case 3:
-                    jump = 0;
-					break;
+			case 3:
+				jump = 0;
+				break;
 
-				case 4:
-					exit(0);
-					break;
-                default:
-                    printf("Enter error\n");
-		
-			}	
+			case 4:
+				exit(0);
+				break;
+
+			default:
+				printf("Enter error\n");
+
+		}	
 	}
 }
 
@@ -165,38 +167,39 @@ void crazy_choose(void)
 	int jump = 1;
 	int count;
 	int count1 = 0;
+	char ch;
 
 	while (jump) {
 
-			system("clear");
+		system("clear");
 
-			printf("\n          Welcome crazy game               \n");
+		printf("\n          Welcome crazy game               \n");
 
-			count =  game_choose(count1);
+		count =  game_choose(count1);
 
-			switch (count) {
-				case 0:
-					crazy_enter();
-					break;
+		switch (count) {
+			case 0:
+				crazy_enter();
+				break;
 
-				case 1:
-					Crazy_Rule();
-                    getchar();
-					break;
+			case 1:
+				crazy_rule();
+				getchar();
+				break;
 
-				case 2:
-					crazy_list();
-                    getchar();
-					break;
+			case 2:
+				crazy_list();
+				while ((ch = getchar()) != '\n' && ch != EOF);
+				break;
 
-				case 3:
-                    jump = 0;
-					break;
+			case 3:
+				jump = 0;
+				break;
 
-				case 4:
-					exit(0);
-					break;
-			}	
+			case 4:
+				exit(0);
+				break;
+		}	
 	}
 }
 

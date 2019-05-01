@@ -13,15 +13,15 @@ vpath %.o $(OBJSDIR)
 
 $(OUTPUTNAME):$(OBJ)
 	$(CC) $(OBJS) -o $(BINDIR)/$@ $(CFLAGS)
-
+	@echo $(LOG)
 %.o:%.c
 	$(CC) $(INCLUDES) $(CFLAGS) -c $^ -o $(OBJSDIR)/$@
 
 clean:
-	-rm -rf $(BUILDDIR)
-	-rm -rf ./lib
+	$(RM) $(BUILDDIR)
+	$(RM) ./lib
 
 clean_obj:
-	-rm -rf ./build/obj
+	$(RM) ./build/obj
 
 .PHONY:clean clean_obj

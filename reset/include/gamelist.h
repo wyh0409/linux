@@ -1,14 +1,15 @@
 #ifndef _GAMELIST_H_
 #define _GAMELIST_H_
 
-extern void guess_list(void);
-/*extern struct game_list_score *crazy_list_sequency(struct game_list_score *conduit1,
-				                             int count);*/
-extern void crazy_list(void);
-/*extern struct game_list_score *guess_lsit_sequency(struct game_list_score *conduit1,
-				                              int count);*/
+extern int guess_list(void);
+extern int crazy_list(void);
 extern void crazy_reset(void);
 extern void guess_reset(void);
+
+#define TRUE        		(1)
+#define OPEN_FILE_FLASE 	(-1)
+#define FILE_ERROR 			(-1)
+#define FILE_NULL 			(0)
 
  struct game_list_score{
 		char name[30];

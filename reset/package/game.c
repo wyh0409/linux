@@ -13,6 +13,7 @@
 #include "game.h"
 #include "color.h"
 #include "gamelist.h"
+#include "debug.h"
 
 
 
@@ -41,8 +42,7 @@ int guess_random_number(int dismantle_create_number[4])
        dismantle_create_number[2] = (create_number%100)/10;
        dismantle_create_number[3] = create_number%10;
 
-			/*	printf("%d\t", create_number);*/
-    } while(dismantle_create_number[0] == dismantle_create_number[1]
+    } while (dismantle_create_number[0] == dismantle_create_number[1]
             || dismantle_create_number[0] == dismantle_create_number[2]
             || dismantle_create_number[0] == dismantle_create_number[3]
             || dismantle_create_number[1] == dismantle_create_number[2]
@@ -58,7 +58,7 @@ int guess_random_number(int dismantle_create_number[4])
  * 猜数字游戏输入
  * 将输入的数字拆分
  *                  */
-void guess_enter_number(void)
+int guess_enter_number(void)
 {
 	int guess_enter;
 	int count = 1;
@@ -73,30 +73,38 @@ void guess_enter_number(void)
 	dismantle_create_number[4] = guess_random_number(dismantle_create_number);
 
 	while (run1) {
+        printf(RED"\nPlease enter your guess number:\n"NONE);
+        scanf("%d" ,&guess_enter);
+        while((ch = getchar()) != '\n' && ch != EOF);
+        
+        if ((guess_enter/1000) == 0 || (guess_enter/1000) >= 10) {
+            printf("Enter Error,please resume load");
+        } else {
+            dismantle_guess_number[0] = guess_enter/1000;
+            dismantle_guess_number[1] = (guess_enter%1000)/100;
+            dismantle_guess_number[2] = (guess_enter%100)/10;
+            dismantle_guess_number[3] = guess_enter%10;
 
-          printf(RED"\nPlease enter your number:\n"NONE);
-          scanf("%d" ,&guess_enter);
-          while((ch = getchar()) != '\n' && ch != EOF);
-          
-          if ((guess_enter/1000) == 0 || (guess_enter/1000) >= 10) {
-             printf("Enter Error");
-          } else {
-               dismantle_guess_number[0] = guess_enter/1000;
-               dismantle_guess_number[1] = (guess_enter%1000)/100;
-               dismantle_guess_number[2] = (guess_enter%100)/10;
-               dismantle_guess_number[3] = guess_enter%10;
+            guess_time = malloc(sizeof(struct game_list_score));
 
-               guess_time = malloc(sizeof(struct game_list_score));
-
-               run1 = contrast_number(run1, dismantle_create_number,dismantle_guess_number);
-               guess_time->guess_score = count+1;
-		}
+            run1 = contrast_number(run1, dismantle_create_number
+                                    ,dismantle_guess_number);
+            guess_time->guess_score = count+1;
+        }
 	}
 
-	fp = fopen("./lib/guess_list.txt","a");
+	fp = fopen("./lib/guess_list.txt","a+");
+    if (!fp) {
+        fp = fopen("./lib/guess_list.txt", "a+"); 
+        if (!fp) {
+            DEBUG("open guess_lsit.txt flase");
+            return GUESS_FILE_ERROR;
+        }
+    }
 	fwrite(guess_time, sizeof(struct game_list_score), 1, fp);
 	fflush(fp);
 	fclose(fp);
+    return TRUE;
 }
 
 /*
@@ -112,7 +120,7 @@ int contrast_number(int run1, int create_number[4], int guess_number[4])
     char choose;
     char ch;
 
-	for (count = 0; count < 4; count++) {
+	for (count = 0; count < Digital_digits; count++) {
 		if (create_number[count]== guess_number[count]) {
            count1 = count1+1;
            continue;
@@ -123,7 +131,6 @@ int contrast_number(int run1, int create_number[4], int guess_number[4])
            || guess_number[count] == create_number[2]
            || guess_number[count] == create_number[3]) {
            count2 = count2+1;
-
 		} else {
              count1 = count1;
              count2 = count2;
@@ -131,29 +138,30 @@ int contrast_number(int run1, int create_number[4], int guess_number[4])
 			
 	}
 
-	if (count1 == 4) {
+	if (count1 == Digital_digits) {
         printf("%dA%dB\n",count1,count2);
         printf("You win!!\n");
-        run = 0;
+        run = FALSE;
 	} else {
         printf("%dA%dB\n",count1,count2);
-        run = 1;
+        run = TRUE;
 	}
 
     while (run1) {
-        printf("\nEnter 'r' play game again, 'q' quit game \n"
-               "'b' back game choose, 'c' continue\n");
+        printf("Enter any to contiue");
         while((ch = getchar()) != '\n' && ch != EOF);
+        printf("\nEnter 'r' play game again,  'q' quit game \n"
+                       "'b' back game choose, 'c' continue\n");       
 	    choose = getchar();
 
         switch (choose) {
             case 'r':
-                run1 = 1;
+                run1 = TRUE;
                 break;
 
             case 'b':
-                run1 = 0;
-                run = 0;
+                run1 = FALSE;
+                run = FALSE;
                 break;
 
             case 'q':
@@ -161,11 +169,11 @@ int contrast_number(int run1, int create_number[4], int guess_number[4])
                 break;
 
             case 'c':
-                run1 = 0;
+                run1 = FALSE;
                 break;
 
             default: 
-                printf("\nEnter errot\n");
+                printf("\nEnter error\n");
         }
     }
     return(run);
@@ -188,7 +196,7 @@ static void handler(int sig){
  * 疯狂按键游戏
  * 游戏输入、
  * */
-void crazy_enter(void)
+int crazy_enter(void)
 {
 	   
 	char crazy_enter;
@@ -196,19 +204,16 @@ void crazy_enter(void)
 	struct game_list_score *crazy_number;
 	unsigned int alarm(unsigned int seconds);
 	char ch;
+    //int rt;
 	FILE *fp = NULL;
     struct sigevent evp;
 
     count = 0;
-
     memset(&evp, 0, sizeof(struct sigevent));
-		/*signal(SIGALRM, handler);
-
-		alarm(5);*/
 
 	crazy_number = (struct game_list_score *)malloc(sizeof(struct game_list_score));
 
-
+    printf("Enter ‘enter’ to continue");
     while((ch = getchar()) != '\n' && ch != EOF);
 
 	printf("PLEASE CRAZY ENTER S ONCE PRESS ENTER ONCE\n");
@@ -236,12 +241,22 @@ void crazy_enter(void)
 	system("stty icanon");
 	system("stty echo");
 
-	fp = fopen("./lib/crazy_list.txt", "a");
+	fp = fopen("./lib/crazy_list.txt", "a+");
+    if (!fp) {
+        fp = fopen("./lib/crazy_list.txt", "a+"); 
+        if (!fp) {
+            DEBUG("open crazy_lsit.txt flase");
+            return CRAZY_FILE_ERROR;
+        }
+    }
+    
+	fwrite(&crazy_number, sizeof(struct game_list_score),1,fp);
 
-	fwrite(crazy_number, sizeof(struct game_list_score),1,fp);
-
+    fflush(fp);
 	fclose(fp);
     free(crazy_number);
+
+    return TRUE;
 }
 
 /*
@@ -264,4 +279,24 @@ void uninit_time(void)
     value.it_value.tv_usec = 0;
     value.it_interval = value.it_value;
     setitimer(ITIMER_REAL, &value, NULL);
+}
+
+void deal(int verdict)
+{
+    char choose;
+    if (verdict == TRUE) {
+        printf("\nI konw this was dangerous, if you using printf.\n"
+               "I think this should be something, don't worry\n"
+               "next I could deal or more terrible\n"
+               "now if you want quit enter 'y', continue enter 'n'\n");
+        choose = getchar();
+        if (choose == 'y') {
+            exit(0);
+        } else if (choose == 'n') {
+            printf("because code not well, you could befor use\n");    
+        } else {
+            printf("your too boring quit\n");
+            exit(0);
+        }       
+    }
 }

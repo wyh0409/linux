@@ -8,7 +8,7 @@
 /*
  * 注册或登录界面
  *                */
-void Login_UI(void)
+void login_ui(void)
 {
 	printf(YELLOW);
 	printf("\n");
@@ -24,7 +24,7 @@ void Login_UI(void)
 /*
  * 猜数字游戏规则
  *                  */
-void show_Guess_Rule(void)
+void show_guess_rule(void)
 {
 	printf(RED);
 	printf("\n");
@@ -41,21 +41,21 @@ void show_Guess_Rule(void)
 /*
  * 疯狂按键游戏规则
  * */
-void Crazy_Rule(void)
+void crazy_rule(void)
 {
 	printf(RED);
 	printf("\n");
 	printf("=========================================================\n"
            "*                    游戏规则                           *\n"
-			   "*       在规定的5秒内疯狂按键盘上的一次s再按一次回车键  *\n"
-			   "*          5秒内按键的总次数越高排行榜越高              *\n"
-			   "=========================================================");
+			"*       在规定的5秒内疯狂按键盘上的一次s再按一次回车键  *\n"
+			"*          5秒内按键的总次数越高排行榜越高              *\n"
+			"=========================================================");
 		printf(NONE);
 
 }
 
 /*游戏选择*/
-void Choose_Game(void)
+void choose_game(void)
 {
 	printf(YELLOW);
 	printf("\n");

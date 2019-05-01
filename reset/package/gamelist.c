@@ -4,10 +4,11 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 
 #include "gamelist.h"
 #include "game.h"
-
+#include "debug.h"
 
 static struct game_list_score *crazy_list_sequency(struct game_list_score *conduitfist, int count);
 static struct game_list_score *guess_list_sequency(struct game_list_score *conduitfist, int count);
@@ -20,33 +21,39 @@ static struct game_list_score *guess_list_sequency(struct game_list_score *condu
 
 static struct game_list_score *crazy_list_sequency(struct game_list_score *conduitfist, int count)
 {
-
-	struct game_list_score *conduit, *conduit_second, *conduit3;
+    int temp;
+	struct game_list_score *conduit, *conduit_crazy;
 
 	conduit = (struct game_list_score *)malloc(sizeof(struct game_list_score));
+    conduit_crazy = (struct game_list_score *)malloc(sizeof(struct game_list_score));
+    if (conduit == NULL) {
+        DEBUG("conduit malloc flase");
+    }
+    if (conduit_crazy == NULL) {
+        DEBUG("conduit_crazy malloc flase");
+    }
     
-	while (conduit->next != NULL) {
+    
+    conduit = conduitfist;
+    conduit_crazy = NULL;
+    
+	while (conduit != conduit_crazy) {
+        while (conduit->next != NULL) {
 
-        conduit = conduitfist;
-        conduit_second = conduitfist->next;
+            if (conduit->crazy_score < (conduit->next)->crazy_score) {
+                temp = conduit->crazy_score;
+                conduit->crazy_score = conduit->next->crazy_score;
+                conduit->next->crazy_score = temp;
 
-        while (conduit_second->next != NULL) {
-
-            if (conduit_second->crazy_score > (conduit_second->next)->crazy_score) {
-                conduit3 = conduit_second->next;
-                conduit->next = conduit_second->next;
-                conduit_second->next = conduit_second->next->next;
-                conduit->next->next = conduit_second;
-                conduit_second = conduit3;
             }
-
-            conduit_second = conduit_second->next;
             conduit = conduit->next;
 		}
+        conduit_crazy = conduit;
+        conduit = conduitfist;
 	}
 
-	free(conduit);
-
+	//free(conduit);
+    free(conduit_crazy);
 	return(conduitfist);
 }
 
@@ -57,67 +64,81 @@ static struct game_list_score *crazy_list_sequency(struct game_list_score *condu
  * 排行榜功能
  *               */
 
-void crazy_list(void)
+int crazy_list(void)
 {
-
-	int count = 0;
-    int number = 1;
-    int rt;
+	int count;
+    int number = TRUE;
+    int rt = TRUE;
+    int fd;
 	struct game_list_score *head = NULL;
 	struct game_list_score *conduitfist = NULL;
 	struct game_list_score *conduit_second; 
-	FILE *fp = NULL;
 
-	fp = fopen("./lib/crazy_list.txt", "r");
-	if (!fp) {
-			crazy_reset();/*重置排行榜*/
-	} else {
-		head = (struct game_list_score *)malloc(sizeof(struct game_list_score));
-		conduitfist = (struct game_list_score *)malloc(sizeof(struct game_list_score));
-		conduit_second = (struct game_list_score *)malloc(sizeof(struct game_list_score));
-
-		head->next = NULL;
-		conduitfist = head;
-		conduitfist->next = NULL;
-
-		while (!feof(fp)) {
-				
-            rt = fread(conduit_second, sizeof(struct game_list_score),1,fp);
-            if (rt == 0) {
-                printf("Read error");
-            }
-            count = count+1;
-
-            conduitfist->next = conduit_second;
-            conduitfist = conduit_second;
-            conduitfist->next = NULL;
-		}
-		fclose(fp);
-
-		conduitfist = crazy_list_sequency(conduitfist, count);
-
-		fp = fopen("./lib/crazy_list.txt", "w");
-
-		while (head != NULL) {
-
-            printf("RANK\t\t\tNumber\n");
-            printf("%d\t\t\t%d\n",number,conduitfist->crazy_score);
-
-            number = number+1;
-            count = count-1;
-
-            fwrite(head, sizeof(struct game_list_score),1,fp);
-
-            head = head->next;
-		}
-
-        fflush(fp);
-        fclose(fp);
-				
+	fd = open("./lib/crazy_list.txt",O_RDWR,0777);
+	if (fd == OPEN_FILE_FLASE) {
+        DEBUG("open crazy_list fail");
+        close(fd);
+		crazy_reset();/*重置排行榜*/
 	}
+    head = (struct game_list_score *)malloc(sizeof(struct game_list_score));
+    conduitfist = (struct game_list_score *)malloc(sizeof(struct game_list_score));
+    conduit_second = (struct game_list_score *)malloc(sizeof(struct game_list_score));
+    if (head == NULL) {
+        DEBUG("head malloc flase");
+    }
+    if (conduitfist == NULL) {
+        DEBUG("conduitfis malloc flase");
+    }
+    if (conduit_second == NULL) {
+        DEBUG("conduig_second malloc flase");
+    }
+    
+    
+    head->next = NULL;
+    conduitfist = head;
+    while (rt == TRUE) {
+        rt = read(fd,conduit_second,sizeof(struct game_list_score)); 
+        if (rt == FILE_ERROR) {
+            DEBUG("Read error");
+        }
+        if (rt > FILE_NULL) {
+            conduit_second->next = NULL;
+            if (NULL == head) {
+                head = conduit_second;
+            } else {
+                conduitfist->next = conduit_second;
+                conduitfist = conduit_second;
+            }   
+        }  
+        count = count+1;
+    }
+    close(fd);
 
-	free(head);
-/*	free(conduitfist);*/
+    conduitfist = crazy_list_sequency(conduitfist, count);
+    fd = open("./lib/crazy_list.txt",O_RDWR,0777);
+    if (fd == OPEN_FILE_FLASE) {
+        DEBUG("open crazy_list.txt flase");
+        return OPEN_FILE_FLASE;
+    }
+    
+
+    while (head != NULL) {
+        printf("RANK\t\t\tNumber\n");
+        printf("%d\t\t\t%d\n",number,head->crazy_score);
+
+        number = number+1;
+        count = count-1;
+
+        rt = write(fd,head,sizeof(struct game_list_score));
+        if (rt == FILE_ERROR) {
+            DEBUG("Write error");
+        }
+        
+        head = head->next;
+    }
+    close(fd);				
+	//free(conduitfist);
+    return TRUE;
 }
 
 
@@ -132,6 +153,10 @@ static struct game_list_score *guess_list_sequency(struct game_list_score *condu
 	struct game_list_score *conduit = NULL, *conduit_second = NULL, *conduit3;
 
 	conduit = (struct game_list_score *)malloc(sizeof(struct game_list_score));
+    if (conduit == NULL) {
+        DEBUG("guess conduit malloc flase");
+    }
+    
 
 	while (conduit->next != NULL) {
 
@@ -162,65 +187,95 @@ static struct game_list_score *guess_list_sequency(struct game_list_score *condu
  * 游戏排行榜功能
  *                */
 
-void guess_list(void)
+int guess_list(void)
 {
-
-	FILE *fp = NULL;
-    int rt;
+    int rt = TRUE;
     int number = 1;
+    int fd;
 	struct game_list_score *head = NULL;
 	struct game_list_score *conduitfist = NULL;
 	struct game_list_score *conduit_second = NULL;
 	int count = 0;
 
-	fp = fopen("./lib/guess_list.txt","r");
-	if (!fp) {
+	fd = open("./lib/guess_list.txt",O_RDWR,0777);
+	if (fd == FILE_ERROR) {
        guess_reset();
-	} else {
-       head = (struct game_list_score *)malloc(sizeof(struct game_list_score));
-       conduitfist = (struct game_list_score *)malloc(sizeof(struct game_list_score));
+    }
+    close(fd);
 
-       head->next = NULL;
-       conduitfist = head;
-       conduitfist->next = NULL;
+    head = (struct game_list_score *)malloc(sizeof(struct game_list_score));
+    conduitfist = (struct game_list_score *)malloc(sizeof(struct game_list_score));
+    if (head == NULL) {
+        DEBUG("guess head malloc flase");
+    }
+    if (conduitfist == NULL) {
+        DEBUG("guess conduitfist malloc flase");
+    }
+    
+    
 
-       while (!feof(fp)) {
-           conduit_second = (struct game_list_score *)malloc(sizeof(struct game_list_score));
-            rt = fread(conduit_second, sizeof(struct game_list_score),1,fp);
-            if (rt == 0) {
-                printf("Read error");
-            }
-            conduitfist->next = conduit_second;
-            conduitfist = conduit_second;
-            conduitfist->next = NULL;
+    if (NULL != head) {
+        head->next = NULL;
+    }
+    conduitfist = head;
+    conduitfist->next = NULL;
 
-            count = count+1;
-       }
+    fd = open("./lib/guess_list.txt",O_RDWR,0777);
+    while (rt == TRUE) {
+        conduit_second = (struct game_list_score *)malloc(sizeof(struct game_list_score));
+        if (conduitfist == NULL) {
+            DEBUG("guess conduit_second malloc flase");
+        }
+        rt = read(fd,conduit_second,sizeof(struct game_list_score));
+        if (rt == FILE_ERROR) {
+            DEBUG("Read error");
+        }
+        if (rt > FILE_NULL) {
+            conduit_second->next = NULL;
+            if (NULL == head) {
+                head = conduit_second;
+            } else {
+                conduitfist->next = conduit_second;
+                conduitfist = conduit_second;
+            }   
+        }  
+        count = count+1;
+    }
+    close(fd);
 
-       fclose(fp);
+    head = guess_list_sequency(head, count);
+            
+    fd = open("./lib/guess_list.txt",O_RDWR,0777);
+    if (fd == OPEN_FILE_FLASE) {
+        DEBUG("open guess_list.txt flase");
+        fd = open("./lib/guess_list.txt",O_RDWR,0777);
+        if (fd == OPEN_FILE_FLASE) {
+            return FILE_ERROR;
+        }
+        
+    }
+    
 
-       conduitfist = guess_list_sequency(conduitfist, count);
-				
-       fp = fopen("./lib/guess_list.txt", "w");
+    while (!head) {
+        printf("RANK\t\t\tNumber\n");
+        printf("%d\t\t\t%d\n",number,head->guess_score);
+        number = number+1;
 
-       while (conduitfist != NULL) {
-            printf("RANK\t\t\tNumber\n");
-            printf("%d\t\t\t%d\n",number,conduitfist->guess_score);
-            number = number+1;
-
-            fwrite(conduitfist,sizeof(struct game_list_score),1,fp);
-
-            conduitfist = conduitfist->next;
-						
-            count = count-1;
-       }
-       fflush(fp);
-       fclose(fp);
-	}
+        rt = write(fd,head,sizeof(struct game_list_score));
+        if (rt == FILE_ERROR) {
+            DEBUG("write error");
+        }
+        
+        head = head->next;
+                    
+        count = count-1;
+    }
+    close(fd);
 
     free(head);
-    free(conduitfist);
-	free(conduit_second);
+    free(conduit_second);
+
+    return TRUE;
 }
 
 
@@ -230,12 +285,14 @@ void guess_list(void)
  *              */
 void crazy_reset(void)
 {
+    int fd;
+	fd = open("./lib/crazy_list.txt",O_RDWR|O_CREAT,0777);
+    if (fd == OPEN_FILE_FLASE) {
+        DEBUG("create crazy_list.txt flase");
+    }
+    
 
-	FILE *fp = NULL;
-
-	fp = fopen("./lib/crazy_list.txt","w");
-
-	fclose(fp);
+	close(fd);
 }
 
 
@@ -245,10 +302,12 @@ void crazy_reset(void)
  *                 */
 void guess_reset(void)
 {
+    int fd;
+	fd = open("./lib/guess_list.txt",O_RDWR|O_CREAT,0777);
+    if (fd == OPEN_FILE_FLASE) {
+        DEBUG("create guess_list.txt flase");
+    }
+    
 
-	FILE *fp = NULL;
-
-	fp = fopen("./lib/guess_list.txt","w");
-
-	fclose(fp);
+	close(fd);
 }
