@@ -9,7 +9,7 @@ extern void deal(int verdict);
 
 #define TRUE (1)
 #define FALSE (0)
-#define Digital_digits (4)
+#define DIGITAL_DIGITS (4)
 
 struct game_list_score2{
 		char name[30];

@@ -7,7 +7,7 @@ extern void crazy_reset(void);
 extern void guess_reset(void);
 
 #define TRUE        		(1)
-#define OPEN_FILE_FLASE 	(-1)
+#define OPEN_FILE_FALSE 	(-1)
 #define FILE_ERROR 			(-1)
 #define FILE_NULL 			(0)
 

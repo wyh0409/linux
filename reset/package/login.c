@@ -1,3 +1,4 @@
+
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -15,21 +16,26 @@
 static int contrast_regist(char *name);
 
 
-int regist(void)/*游戏注册*/
+/**
+ * @brief   游戏注册   
+ * @return: 成功返回0
+ *          失败返回-1
+ */
+int regist(void)
 {
-	int count1;
+	int count_pwd;
 	int jump;
 	struct user *regist,*player;
 	FILE *fp = NULL;
 	char ch;
-    int rt = 0;
+    int return_value = 0;
 
 	regist = (struct user *)malloc(sizeof(struct user));
 	player = (struct user *)malloc(sizeof(struct user));
 
 	system("clear");
 
-	printf("\n\n\t\t\tWelocm registration game\n\n");
+	printf("\n\n\t\t\tWelcome registration game\n\n");
 
 	jump = TRUE;
 	while (jump) {
@@ -42,7 +48,7 @@ int regist(void)/*游戏注册*/
                 DEBUG("\t\t\topen player faile\n\n");
                 fp = fopen("./lib/player.txt", "w");
                 if (!fp) {
-                    rt = PLAYER_FILE_ERROR;
+                    return_value = PLAYER_FILE_ERROR;
                 }
                 
             } else {
@@ -50,7 +56,7 @@ int regist(void)/*游戏注册*/
                 jump = contrast_regist(regist->name);
             }
         } else {
-            printf("\n\t\tIncorrect account,plesde input again\n");
+            printf("\n\t\tIncorrect account,please input again\n");
             jump = TRUE;
         }
     }
@@ -65,15 +71,15 @@ int regist(void)/*游戏注册*/
 
         while ((ch = getchar()) != '\n' && ch != EOF);
         
-        for (count1 = 0; count1 < 8; count1++) {
-            regist->password[count1] = getchar();
+        for (count_pwd = 0; count_pwd < 8; count_pwd++) {
+            regist->password[count_pwd] = getchar();
             /*判断密码输入*/
-            if (isalpha(regist->password[count1]) != 0
-                || isdigit(regist->password[count1]) != 0) {
+            if (isalpha(regist->password[count_pwd]) != 0
+                || isdigit(regist->password[count_pwd]) != 0) {
 
                 printf("*");
             } else {
-                count1 = count1-1;
+                count_pwd = count_pwd-1;
                 printf("\n\t\tenter error ");
             }
         }
@@ -85,49 +91,49 @@ int regist(void)/*游戏注册*/
         jump = 0;
 	}
 
-	fp = fopen("./lib/player.txt","a");
+	fp = fopen("./lib/player.txt", "a");
 	if (!fp) {
         DEBUG("open error\n");
         fp = fopen("./lib/player.txt", "a");
         if (!fp) {
-            rt = PLAYER_FILE_ERROR;
+            return_value = PLAYER_FILE_ERROR;
         }
         
 	}
     
-    fwrite(regist,sizeof(struct user),1,fp);
+    fwrite(regist,sizeof(struct user), 1, fp);
     fflush(fp);
     fclose(fp);
 
     free(regist);
     free(player);
 
-    return (rt);
+    return (return_value);
 }
 
-/*判断注册*/
+/**
+ * @brief    判断注册
+ * @return:  成功返回0
+ *           失败返回1 
+ */
 static int contrast_regist(char *name)
 {
-
     FILE *fp = NULL;
 	struct user *player;
 	int jump = 1;
 
 	fp = fopen("./lib/player.txt", "r");
     rewind(fp);
-    /*if (rt == FILE_ERROR) {
-        printf("File errror");
-    }*/
     
 	player = (struct user *)malloc(sizeof(struct user));
 
 	while (!feof(fp)) {
-        fread(player,sizeof(struct user),1,fp);
+        fread(player,sizeof(struct user), 1, fp);
         if (player->name == NULL) {
             jump = 0;
         } else {
             if (strcmp(player->name, name) == 0) {
-                printf("\nYour account alread exists.plase re register\n");
+                printf("\nYour account already exists.please re register\n");
                 jump = 1;
                 break;
             } else {
@@ -142,13 +148,17 @@ static int contrast_regist(char *name)
 	return(jump);
 }
 
-/*登录*/
+/**
+ * @brief:      账户登录 
+ * @return:     成功返回0
+ *              失败返回-1 
+ */
 int logining(void)
 {
-	int run3 = 1;
-	int count1;
-	int count2 = 1;
-    int rt = 0;
+	int jump = 1;
+	int count_pwd;
+	int pwd_input_count = 1;
+    int return_value = 0;
 	char ch;
 	struct user *login, *player;
 	FILE *fp = NULL;
@@ -158,7 +168,7 @@ int logining(void)
 
 	system("clear");
 
-	while (run3) {
+	while (jump) {
           printf("\n\n\t\t\tWelcome login game\n\n");
           printf("\t\tenter user name:");
           scanf("%s", login->name);
@@ -170,14 +180,14 @@ int logining(void)
           
           while ((ch = getchar()) != '\n' && ch != EOF);
           
-          for (count1 = 0; count1 < 8; count1++) {
-              login->password[count1] = getchar();
+          for (count_pwd = 0; count_pwd < 8; count_pwd++) {
+              login->password[count_pwd] = getchar();
               /*判断密码输入*/
-              if (isdigit(login->password[count1]) != 0
-                 || isalpha(login->password[count1]) != 0) {
+              if (isdigit(login->password[count_pwd]) != 0
+                 || isalpha(login->password[count_pwd]) != 0) {
                   printf("*");
               } else {
-                   count1 = count1-1;
+                   count_pwd = count_pwd-1;
                    printf("\n\t\tenter error");
               }
           }
@@ -188,30 +198,30 @@ int logining(void)
           
           fp = fopen("./lib/player.txt", "r");
           if (!fp) {
-              rt = PLAYER_FILE_ERROR;
+              return_value = PLAYER_FILE_ERROR;
           }
           
           rewind(fp);
           
           while (!feof(fp)) {
-                fread(player,sizeof(struct user),1,fp);
+                fread(player,sizeof(struct user), 1, fp);
                 if(strcmp(player->name, login->name) == 0 &&
                    strcmp(player->password, login->password) == 0) {
-                   printf("\n\n\t\tWelcome start game\n\n");
-                   run3 = 0;
+                   printf("\n\n\t\tWelcome stareturn_value game\n\n");
+                   jump = 0;
                    break;
                 }	
           }
           fclose(fp);
           
-          if (run3 == 1) {
+          if (jump == 1) {
               printf("\n\n\t\t Login error \n\n");
-              count2 = count2+1;
+              pwd_input_count = pwd_input_count+1;
           } else {
                   continue;
           }
        
-          if (count2 > 3) {
+          if (pwd_input_count > 3) {
               exit(0);
               break;
           }  else {
@@ -222,14 +232,17 @@ int logining(void)
 	free(login);
 	free(player);
 
-    return rt;
+    return return_value;
 }
 
 
+/**
+ * @brief       初始化 
+ * @return:     成功返回0
+ */
 int init(void)
 {
     int fd;
-  
     fd = open("./lib/player.txt", O_CREAT|O_RDWR, 0777);
     if (fd == FILE_ERROR) {
        if (access("./lib", F_OK) != 0) {

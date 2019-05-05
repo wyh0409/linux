@@ -6,7 +6,7 @@
 
 
 /*
- * 注册或登录界面
+ * @brief 注册或登录界面
  *                */
 void login_ui(void)
 {
@@ -22,7 +22,7 @@ void login_ui(void)
 }
 
 /*
- * 猜数字游戏规则
+ *@brief  猜数字游戏规则
  *                  */
 void show_guess_rule(void)
 {
@@ -39,7 +39,7 @@ void show_guess_rule(void)
 }
 
 /*
- * 疯狂按键游戏规则
+ *@brief  疯狂按键游戏规则
  * */
 void crazy_rule(void)
 {
@@ -54,7 +54,10 @@ void crazy_rule(void)
 
 }
 
-/*游戏选择*/
+
+/**
+ * @brief	游戏选择界面  
+ */
 void choose_game(void)
 {
 	printf(YELLOW);

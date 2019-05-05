@@ -1,3 +1,4 @@
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -24,10 +25,12 @@ static void set_timer(void);
 static void uninit_time(void);
 static int count = 0;
 
-/*
- * 生成随机数字
- * 将生成的数字拆分
- *                 */
+/**
+ * @brief   猜数字随机数字生成
+ * @param   生成随机数字
+ *          将生成的数字拆分 
+ * @return: 返回生成的数字
+ */
 int guess_random_number(int dismantle_create_number[4])
 {
 	int create_number;
@@ -54,24 +57,30 @@ int guess_random_number(int dismantle_create_number[4])
 }
 
 
-/*
- * 猜数字游戏输入
- * 将输入的数字拆分
- *                  */
+
+/**
+ * @brief:  猜数字输入 
+ * @param:  猜数字游戏输入
+ *          将输入的数字拆分 
+ * @return: 正确返回1
+ *          错误返回-1
+ */
 int guess_enter_number(void)
 {
 	int guess_enter;
 	int count = 1;
 	int run1 = 1;
     char ch;
+    int fd;
+    int return_value;
 	int dismantle_guess_number[4];
 	int dismantle_create_number[4];
 
-	struct game_list_score2 *guess_time;
-	FILE *fp = NULL;
+	struct game_list_score *guess_time;
 
 	dismantle_create_number[4] = guess_random_number(dismantle_create_number);
 
+    
 	while (run1) {
         printf(RED"\nPlease enter your guess number:\n"NONE);
         scanf("%d" ,&guess_enter);
@@ -86,43 +95,53 @@ int guess_enter_number(void)
             dismantle_guess_number[3] = guess_enter%10;
 
             guess_time = malloc(sizeof(struct game_list_score));
-
+            if (count == TRUE) {
+                guess_time->guess_score = 0;
+            }
             run1 = contrast_number(run1, dismantle_create_number
-                                    ,dismantle_guess_number);
+                                    , dismantle_guess_number);
             guess_time->guess_score = count+1;
         }
 	}
 
-	fp = fopen("./lib/guess_list.txt","a+");
-    if (!fp) {
-        fp = fopen("./lib/guess_list.txt", "a+"); 
-        if (!fp) {
-            DEBUG("open guess_lsit.txt flase");
-            return GUESS_FILE_ERROR;
-        }
+	fd = open("./lib/guess_list.txt", O_WRONLY, 0777);
+    if (fd == CRAZY_FILE_ERROR) {
+        fd = open("./lib/crazy_list.txt", O_WRONLY, 0777);
+        if (fd == CRAZY_FILE_ERROR) {
+            printf("crazy_file create error");
+               exit(0);
+        }   
     }
-	fwrite(guess_time, sizeof(struct game_list_score), 1, fp);
-	fflush(fp);
-	fclose(fp);
+    lseek(fd, 0, SEEK_END);
+	return_value = write(fd, guess_time, sizeof(struct game_list_score));
+    if (return_value == CRAZY_FILE_ERROR) {
+        DEBUG("write crazy_list.txt error");
+    }
+	close(fd);
+    free(guess_time);
     return TRUE;
 }
 
-/*
- * 对比输入数字和生成数字
- * 生成对比结果
+/**
+ * @brief:  对比数字
+ * @param:  对比输入数字和生成数字
+ *          生成对比结果 
+ * @return: 赢得游戏返回0
+ *          还没有赢返回1
+ *          
  */
 int contrast_number(int run1, int create_number[4], int guess_number[4])
 {
     int run;
 	int count;
-	int count1 = 0;
-	int count2 = 0;
+	int count_a = 0;
+	int count_b = 0;
     char choose;
     char ch;
 
-	for (count = 0; count < Digital_digits; count++) {
+	for (count = 0; count < DIGITAL_DIGITS; count++) {
 		if (create_number[count]== guess_number[count]) {
-           count1 = count1+1;
+           count_a = count_a+1;
            continue;
 		}
 
@@ -130,20 +149,20 @@ int contrast_number(int run1, int create_number[4], int guess_number[4])
            || guess_number[count] == create_number[1]
            || guess_number[count] == create_number[2]
            || guess_number[count] == create_number[3]) {
-           count2 = count2+1;
+           count_b = count_b+1;
 		} else {
-             count1 = count1;
-             count2 = count2;
+             count_a = count_a;
+             count_b = count_b;
 		}
 			
 	}
 
-	if (count1 == Digital_digits) {
-        printf("%dA%dB\n",count1,count2);
+	if (count_a == DIGITAL_DIGITS) {
+        printf("%dA%dB\n", count_a,count_b);
         printf("You win!!\n");
         run = FALSE;
 	} else {
-        printf("%dA%dB\n",count1,count2);
+        printf("%dA%dB\n", count_a,count_b);
         run = TRUE;
 	}
 
@@ -183,29 +202,29 @@ int contrast_number(int run1, int create_number[4], int guess_number[4])
 
 
 /*
- * 时间倒计时
+ * 时间倒计时计数
  *           */
-static void handler(int sig){
-		
+static void handler(int sig)
+{		
 	count = count+1;
 
 }
 
-
-/*
- * 疯狂按键游戏
- * 游戏输入、
- * */
+/**
+ * @brief:  游戏输入
+ * @param:  疯狂按键游戏输入
+ * @return: 成功返回1
+ *          失败返回-1
+ */
 int crazy_enter(void)
-{
-	   
-	char crazy_enter;
-	int total_number = 0;;
+{   
+	char crazy_enter_number;
+	int total_number = 0;
+    char ch;
+	int fd;
+    int return_value;
 	struct game_list_score *crazy_number;
 	unsigned int alarm(unsigned int seconds);
-	char ch;
-    //int rt;
-	FILE *fp = NULL;
     struct sigevent evp;
 
     count = 0;
@@ -225,35 +244,41 @@ int crazy_enter(void)
 	system("stty -icanon");
 	system("stty -echo");
 
+    crazy_number->crazy_score = 0;
 	while (count < 5) {
 
-          signal(SIGALRM, handler);
-          crazy_enter = getchar();
-          crazy_number->crazy_score = crazy_number->crazy_score+1;
-          total_number = total_number+1;
+        signal(SIGALRM, handler);
+        crazy_enter_number = getchar();
+        if (crazy_enter_number == 's') {
+            crazy_number->crazy_score = (crazy_number->crazy_score)+1;
+            total_number = total_number+1;
+        } else {
+            continue;
+        }
 				
 	}
 
     uninit_time();
-	printf("%c",crazy_enter);
-	printf("YOU CRAZY ENTER %d NUMBER",total_number);
+	printf("%c",crazy_enter_number);
+	printf("YOU CRAZY ENTER %d NUMBER", total_number);
 
 	system("stty icanon");
 	system("stty echo");
 
-	fp = fopen("./lib/crazy_list.txt", "a+");
-    if (!fp) {
-        fp = fopen("./lib/crazy_list.txt", "a+"); 
-        if (!fp) {
-            DEBUG("open crazy_lsit.txt flase");
-            return CRAZY_FILE_ERROR;
-        }
+	fd = open("./lib/crazy_list.txt", O_WRONLY, 0777);
+    if (fd == CRAZY_FILE_ERROR) {
+        fd = open("./lib/crazy_list.txt", O_WRONLY, 0777);
+        if (fd == CRAZY_FILE_ERROR) {
+            printf("crazy_file create error");
+               exit(0);
+        }   
     }
-    
-	fwrite(&crazy_number, sizeof(struct game_list_score),1,fp);
-
-    fflush(fp);
-	fclose(fp);
+    lseek(fd, 0, SEEK_END);
+	return_value = write(fd, crazy_number, sizeof(struct game_list_score));
+    if (return_value == CRAZY_FILE_ERROR) {
+        DEBUG("write crazy_list.txt error");
+    }
+	close(fd);
     free(crazy_number);
 
     return TRUE;
@@ -281,6 +306,9 @@ void uninit_time(void)
     setitimer(ITIMER_REAL, &value, NULL);
 }
 
+/**
+ * @brief:处理ctrl+c 
+ */
 void deal(int verdict)
 {
     char choose;

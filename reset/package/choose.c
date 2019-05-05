@@ -9,20 +9,19 @@
 #include "show.h"
 
 
-/*
- * 整合游戏内部选择界面
- * 以及打印和选择
+/**
+ * @brief	光标上下移动	
+ * @param	整合游戏内部选择界面以及打印和选择
+ * @return	返回选择功能对应的值
  */
-
-int game_choose(int count1)
+int game_choose(int choose_count)
 {
-
 	char direction;
 	int count = 0;
 	int run = 1;
 	char ch;
 
-	count1 = 0;
+	choose_count = 0;
 	
 	while ((ch = getchar()) != '\n' && ch != EOF);
 
@@ -37,23 +36,23 @@ int game_choose(int count1)
 				
 			switch (direction) {
 					case 'w':
-						if (count1 == 0) {
+						if (choose_count == 0) {
 							break;
                         } else {
-							count = count1;	
+							count = choose_count;	
 							count = count-1;
-							count1 = count;
+							choose_count = count;
 							choose_game2(count);
                             break;
 						}
 				
 					case 's':
-						if (count1 == 4) {
+						if (choose_count == 4) {
 							break;
                         } else {
-							count = count1;
+							count = choose_count;
 							count = count+1;
-							count1 = count;
+							choose_count = count;
 							choose_game2(count);
 							break;   
                         }
@@ -70,17 +69,16 @@ int game_choose(int count1)
 	system("stty icanon");
 	system("stty echo");
 
-	return(count1);
+	return(choose_count);
 	
 }
 
 /*
- * 打印游戏内的选择界面
+ * @brief		打印游戏内的选择界面
+ * @return		成功返回0
  */
-
 int game_choose_ui(int count)
 {
-
 	char choose[25] = {'*', ' ', ' ', ' ', ' ',
 					   ' ', '*', ' ', ' ', ' ',
 					   ' ', ' ', '*', ' ', ' ',
@@ -91,15 +89,15 @@ int game_choose_ui(int count)
 	printf(YELLOW);
 	printf("=====================================================\n");
 	printf("            %c 1.Start game                          \n"
-			,choose[count]);
+			, choose[count]);
 	printf("            %c 2.Game rule                           \n"
-			,choose[count+1]);
+			, choose[count+1]);
 	printf("            %c 3.Game ling                           \n"
-			,choose[count+2]);
+			, choose[count+2]);
 	printf("            %c 4.Back                                \n"
-			,choose[count+3]);
+			, choose[count+3]);
 	printf("            %c 5.Quit                                \n"
-			,choose[count+4]);
+			, choose[count+4]);
 	printf("=======================================================\n");
 	printf("Use 'w' to up 's' to down\n");
 	printf(NONE);
@@ -108,15 +106,13 @@ int game_choose_ui(int count)
 }
 
 /*
- * 猜数字游戏功能选择
+ * @brief	猜数字游戏功能选择
  */
-
 void guess_choose(void)
 {
-
 	int jump = 1;
 	int count;
-	int count1 = 0;
+	int choose_count = 0;
 	char ch;
 
 	while (jump) {
@@ -125,7 +121,7 @@ void guess_choose(void)
 		
 		printf("\n           Welcome guess game              \n");
 
-		count = game_choose(count1);
+		count = game_choose(choose_count);
 
 		switch (count) {
 			case 0:
@@ -158,15 +154,13 @@ void guess_choose(void)
 }
 
 /*
- * 疯狂按键游戏功能选择选择
+ * @brief	疯狂按键游戏功能选择选择
  */
-
 void crazy_choose(void)
 {
-
 	int jump = 1;
 	int count;
-	int count1 = 0;
+	int choose_count = 0;
 	char ch;
 
 	while (jump) {
@@ -175,7 +169,7 @@ void crazy_choose(void)
 
 		printf("\n          Welcome crazy game               \n");
 
-		count =  game_choose(count1);
+		count =  game_choose(choose_count);
 
 		switch (count) {
 			case 0:
@@ -204,12 +198,11 @@ void crazy_choose(void)
 }
 
 /*
- * 游戏选择界面打印的选择
+ * @brief	游戏选择界面打印的选择
+ * @return	成功返回0
  */
-
 int choose_game2(int count)
 {
-
 	switch (count) {
 		case 0: 
             count = 0;
@@ -242,7 +235,7 @@ int choose_game2(int count)
             break;
 
 		default :
-            printf("hapen error");
+            printf("happen error");
 
 	}
 
